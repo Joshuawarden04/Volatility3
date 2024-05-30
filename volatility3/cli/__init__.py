@@ -716,19 +716,17 @@ class CommandLine:
                 """Gets the final filename"""
                 if output_dir is None:
                     raise TypeError("Output directory is not a string")
+
                 os.makedirs(output_dir, exist_ok=True)
 
-                pref_name_array = self.preferred_filename.split(".")
-                filename, extension = (
-                    os.path.join(output_dir, ".".join(pref_name_array[:-1])),
-                    pref_name_array[-1],
-                )
-                output_filename = f"{filename}.{extension}"
+                output_filename = os.path.join(output_dir, self.preferred_filename)
+                filename, extension = os.path.splitext(output_filename)
 
                 counter = 1
                 while os.path.exists(output_filename):
-                    output_filename = f"{filename}-{counter}.{extension}"
+                    output_filename = f"{filename}-{counter}{extension}"
                     counter += 1
+
                 return output_filename
 
         class CLIMemFileHandler(io.BytesIO, CLIFileHandler):
@@ -792,8 +790,8 @@ class CommandLine:
                     return None
 
                 self._file.close()
-                output_filename = self._get_final_filename()
-                os.rename(self._name, output_filename)
+                self._output_filename = self._get_final_filename()
+                os.rename(self._name, self._output_filename)
 
         if direct:
             return CLIDirectFileHandler
